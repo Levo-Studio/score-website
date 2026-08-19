@@ -65,7 +65,8 @@ jobs:
 
       - name: Verify image exists on GHCR
         run: |
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
+          IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE="${{ env.REGISTRY }}/$IMAGE_NAME_LOWER:sha-${{ github.sha }}"
           echo "Verifying $IMAGE"
           docker buildx imagetools inspect "$IMAGE"
 
@@ -75,6 +76,10 @@ jobs:
     steps:
       - name: Trigger deployment webhook
         run: |
+          if [ -z "${{ secrets.DEPLOYMENT_WEBHOOK_URL }}" ]; then
+            echo "DEPLOYMENT_WEBHOOK_URL secret is not set — skipping deployment trigger."
+            exit 1
+          fi
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             "${{ secrets.DEPLOYMENT_WEBHOOK_URL }}")
           echo "Webhook responded with $STATUS"
