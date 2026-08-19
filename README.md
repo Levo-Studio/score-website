@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/score-icon-petrol-dunkel-1024.png" width="88" alt="Score" />
+<img src=".github/readme/banner.svg" width="820" alt="Score – dein Abischnitt, live mitgerechnet" />
 
-# Score
+<br /><br />
 
 **Der Abi-Planer für Baden-Württemberg.**
 Kurse eintragen, Block I und Prüfungsblock live mitgerechnet — ohne Konto, ohne Server.
@@ -12,10 +12,6 @@ Kurse eintragen, Block I und Prüfungsblock live mitgerechnet — ohne Konto, oh
 [![License](https://img.shields.io/badge/Lizenz-Source--available-7E8784?style=flat-square)](#lizenz)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-
-<br />
-
-<img src="public/score-og-1200x630.png" width="640" alt="Score – erwarteter Abischnitt live mitgerechnet, Block I und Kurse im Blick" />
 
 </div>
 
@@ -84,6 +80,10 @@ Punkten — nicht aus einer Formel.
 
 ## Stack
 
+<details open>
+<summary><strong>Bereich → Wahl</strong> (aufklappen/zuklappen)</summary>
+<br />
+
 | Bereich | Wahl |
 | --- | --- |
 | Framework | [Next.js 16](https://nextjs.org) (App Router) |
@@ -94,6 +94,8 @@ Punkten — nicht aus einer Formel.
 | Hosting | Self-hosted via [Dokploy](https://dokploy.com) + Traefik |
 | Registry | GitHub Container Registry (GHCR) |
 | CI/CD | GitHub Actions |
+
+</details>
 
 <br />
 
@@ -118,6 +120,9 @@ pnpm start   # Produktions-Build lokal starten
 
 ## Projektstruktur
 
+<details>
+<summary><strong>src/</strong> aufklappen</summary>
+
 ```
 src/
 ├── app/                  Next.js App Router — Seiten, Metadaten, Health-Route
@@ -129,6 +134,8 @@ src/
 │   └── motion/           GSAP-Bausteine: Reveal, MaskLines, Stagger, Bars
 └── lib/                  Konstanten, Theme-Hook, geteilte Klassen
 ```
+
+</details>
 
 Externe Verweise (App-Store-Link, GitHub-URLs) stehen gesammelt in
 [`src/lib/constants.ts`](src/lib/constants.ts) — nirgendwo sonst im Code.
