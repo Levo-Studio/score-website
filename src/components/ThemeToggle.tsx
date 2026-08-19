@@ -9,6 +9,8 @@ export function ThemeToggle({ size = "md" }: { size?: "md" | "sm" }) {
   const h = size === "sm" ? 30 : 32;
   const knob = size === "sm" ? 22 : 24;
   const inset = 3;
+  const leftSlot = inset;
+  const rightSlot = w - knob - inset;
 
   return (
     <button
@@ -22,11 +24,11 @@ export function ThemeToggle({ size = "md" }: { size?: "md" | "sm" }) {
     >
       <span
         className="absolute top-[3px] rounded-full bg-(--acc) transition-[left] duration-300 ease-[cubic-bezier(.32,1.12,.4,1)]"
-        style={{ width: knob, height: knob, left: dark ? w - knob - inset : inset }}
+        style={{ width: knob, height: knob, left: dark ? rightSlot : leftSlot }}
       />
       <span
-        className="pointer-events-none absolute top-1/2 left-[8px] -translate-y-1/2 transition-colors duration-300"
-        style={{ color: dark ? "var(--ink2)" : "var(--acc-ink)" }}
+        className="pointer-events-none absolute top-0 flex items-center justify-center transition-colors duration-300"
+        style={{ left: leftSlot, width: knob, height: h, color: dark ? "var(--ink2)" : "var(--acc-ink)" }}
       >
         <svg viewBox="0 0 24 24" width={14} height={14} aria-hidden="true">
           <circle cx="12" cy="12" r="4.4" fill="currentColor" />
@@ -36,10 +38,10 @@ export function ThemeToggle({ size = "md" }: { size?: "md" | "sm" }) {
         </svg>
       </span>
       <span
-        className="pointer-events-none absolute top-1/2 right-[8px] -translate-y-1/2 transition-colors duration-300"
-        style={{ color: dark ? "var(--acc-ink)" : "var(--ink2)" }}
+        className="pointer-events-none absolute top-0 flex items-center justify-center transition-colors duration-300"
+        style={{ left: rightSlot, width: knob, height: h, color: dark ? "var(--acc-ink)" : "var(--ink2)" }}
       >
-        <svg viewBox="0 0 24 24" width={14} height={14} aria-hidden="true">
+        <svg viewBox="0 0 24 24" width={13} height={13} aria-hidden="true">
           <path
             d="M20.2 14.6A8.6 8.6 0 0 1 9.4 3.8a8.6 8.6 0 1 0 10.8 10.8z"
             fill="currentColor"
