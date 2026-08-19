@@ -127,6 +127,11 @@ export function Block() {
           </div>
         </div>
       </Reveal>
+
+      <Reveal delay={0.1} className="mt-8 max-w-[640px] text-[14px] leading-[1.7] text-(--ink2) text-pretty">
+        Zwei deiner drei Leistungsfächer zählen doppelt, deshalb werden aus 40 Kursen 48
+        Wertungen. Bei den Abiturprüfungen zählt jede der fünf Prüfungen vierfach.
+      </Reveal>
     </Section>
   );
 }
