@@ -5,8 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap, { ScrollTrigger } from "@/lib/gsap";
 import { ScoreMark } from "@/components/ScoreMark";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { underlineLink, btnPrimary } from "@/lib/styles";
-import { APP_STORE_URL } from "@/lib/constants";
+import { underlineLink } from "@/lib/styles";
 
 export function Nav() {
   const navRef = useRef<HTMLElement>(null);
@@ -58,15 +57,9 @@ export function Nav() {
               Quellcode
             </a>
             <ThemeToggle />
-            <a href={APP_STORE_URL || "#laden"} className={`ml-2 px-[18px] py-[12px] text-[13.5px] ${btnPrimary}`}>
-              Laden
-            </a>
           </div>
-          <div className="flex items-center gap-3 md:hidden">
+          <div className="md:hidden">
             <ThemeToggle size="sm" />
-            <a href={APP_STORE_URL || "#laden"} className={`px-4 py-[10px] text-[13px] ${btnPrimary}`}>
-              Laden
-            </a>
           </div>
         </div>
       </nav>
