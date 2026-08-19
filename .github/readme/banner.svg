@@ -11,11 +11,6 @@
       <stop offset="62%" stop-color="#4EA3A6" stop-opacity=".15" />
       <stop offset="100%" stop-color="#4EA3A6" stop-opacity="0" />
     </linearGradient>
-    <linearGradient id="track" x1="700" x2="1120" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="rgba(237,241,239,.14)" />
-      <stop offset="60%" stop-color="rgba(78,163,166,.5)" />
-      <stop offset="100%" stop-color="#4EA3A6" />
-    </linearGradient>
     <clipPath id="barClip">
       <rect x="700" y="150" width="420" height="8" rx="4" />
     </clipPath>
@@ -41,14 +36,11 @@
   </g>
 
   <text x="700" y="70" font-family="Arial, sans-serif" font-weight="500" font-size="13" fill="#7E8784">Kursblock + Prüfungsblock</text>
-  <text x="700" y="126" font-family="Arial, sans-serif" font-weight="800" font-size="56" letter-spacing="-2" fill="#EDF1EF">
-    900
-    <animate attributeName="opacity" values="0;1" dur=".01s" begin="0s" fill="freeze" />
-  </text>
-  <text x="782" y="126" font-family="Arial, sans-serif" font-weight="400" font-size="18" fill="#7E8784">Punkte</text>
+  <text x="700" y="126" font-family="Arial, sans-serif" font-weight="800" font-size="48" letter-spacing="-1.6" fill="#EDF1EF">300–900</text>
+  <text x="924" y="126" font-family="Arial, sans-serif" font-weight="400" font-size="18" fill="#7E8784">Punkte</text>
 
-  <rect x="700" y="150" width="420" height="8" rx="4" fill="url(#track)" opacity=".35" />
-  <rect x="700" y="150" width="0" height="8" rx="4" fill="url(#track)" clip-path="url(#barClip)">
+  <rect x="700" y="150" width="420" height="8" rx="4" fill="rgba(237,241,239,.14)" />
+  <rect x="700" y="150" width="0" height="8" rx="4" fill="#4EA3A6" clip-path="url(#barClip)">
     <animate attributeName="width" values="0;420;420" keyTimes="0;0.6;1" dur="3.5s" repeatCount="indefinite" />
   </rect>
   <text x="700" y="182" font-family="Arial, sans-serif" font-size="12.5" fill="#7E8784">300</text>
