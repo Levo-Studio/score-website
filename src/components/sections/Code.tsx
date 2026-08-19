@@ -2,7 +2,7 @@ import { Section, Kicker } from "@/components/Section";
 import { Reveal } from "@/components/motion/Reveal";
 import { MaskLines } from "@/components/motion/MaskLines";
 import { Stagger } from "@/components/motion/Stagger";
-import { cardShell } from "@/lib/styles";
+import { cardShell, hoverCard } from "@/lib/styles";
 import { GITHUB_APP_URL, GITHUB_WEBSITE_URL } from "@/lib/constants";
 
 const REPOS = [
@@ -33,7 +33,7 @@ export function Code() {
       </Reveal>
       <Stagger className="mt-11 grid max-w-[820px] grid-cols-1 gap-4 sm:grid-cols-2" step={0.12}>
         {REPOS.map((r) => (
-          <a key={r.name} href={r.href} className={`block ${cardShell} px-[26px] py-6`}>
+          <a key={r.name} href={r.href} className={`block ${cardShell} ${hoverCard} px-[26px] py-6`}>
             <div className="flex items-center justify-between gap-3.5">
               <span className="font-display text-[15px] leading-[1.3] font-semibold">{r.name}</span>
               <span className="text-[15px] text-(--ink2)">↗</span>

@@ -19,11 +19,19 @@ export const btnOutline =
 
 export const cardShell = "rounded-[28px] border border-(--line) bg-(--sf) p-7";
 
+// Kachel-Hover: Rand wird zur Akzentfarbe, ein 2px-Strich läuft oben ein.
+export const hoverCard =
+  "transition-[border-color,box-shadow] duration-300 ease-out hover:border-(--acc) hover:shadow-[inset_0_2px_0_0_var(--acc)]";
+
+// Listenzeile-Hover: ein Akzentstrich läuft links ein und schiebt den Text an.
+export const hoverRow =
+  "transition-[padding-left,box-shadow] duration-300 ease-out hover:pl-[22px] hover:shadow-[inset_3px_0_0_0_var(--acc)]";
+
 export function chipClass(active: boolean) {
   return (
     "rounded-full px-[15px] py-[11px] text-[12.5px] font-medium border transition-[background-color,color,border-color,transform] duration-300 " +
     (active
       ? "bg-(--acc) text-(--acc-ink) border-transparent"
-      : "bg-(--sf) text-(--ink2) border-(--line)")
+      : "bg-(--sf) text-(--ink2) border-(--line) hover:bg-(--acc) hover:text-(--acc-ink) hover:border-(--acc)")
   );
 }

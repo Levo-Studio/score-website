@@ -2,7 +2,7 @@ import { Section, Kicker } from "@/components/Section";
 import { Reveal } from "@/components/motion/Reveal";
 import { MaskLines } from "@/components/motion/MaskLines";
 import { Stagger } from "@/components/motion/Stagger";
-import { cardShell } from "@/lib/styles";
+import { cardShell, hoverRow } from "@/lib/styles";
 
 const RULES = [
   { label: "Eine Klassenarbeit im Halbjahr", value: "100 %" },
@@ -64,7 +64,7 @@ export function Eintragen() {
               {ENTRIES.map((e) => (
                 <div
                   key={e.name}
-                  className="flex items-center gap-3 rounded-2xl bg-(--sf2) px-[15px] py-[13px] transition-[padding] duration-300"
+                  className={`flex items-center gap-3 rounded-2xl bg-(--sf2) px-[15px] py-[13px] ${hoverRow}`}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="text-[13px] leading-[1.2] font-semibold">{e.name}</div>

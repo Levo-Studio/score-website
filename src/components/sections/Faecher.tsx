@@ -1,7 +1,7 @@
 import { Section, Kicker } from "@/components/Section";
 import { MaskLines } from "@/components/motion/MaskLines";
 import { Stagger } from "@/components/motion/Stagger";
-import { cardShell, chipClass } from "@/lib/styles";
+import { cardShell, chipClass, hoverCard } from "@/lib/styles";
 import { HIGHLIGHTED_SUBJECT_INDICES, SUBJECTS } from "@/lib/subjects";
 
 const FEATURES = [
@@ -29,7 +29,7 @@ export function Faecher() {
       />
       <Stagger className="mt-11 grid grid-cols-1 gap-4 sm:grid-cols-3" step={0.16}>
         {FEATURES.map((f) => (
-          <div key={f.title} className={`${cardShell} px-7 py-7`}>
+          <div key={f.title} className={`${cardShell} ${hoverCard} px-7 py-7`}>
             <div className="font-display text-[15.5px] leading-[1.3] font-semibold">{f.title}</div>
             <p className="mt-3 text-[13.5px] leading-[1.6] text-(--ink2)">{f.text}</p>
           </div>
