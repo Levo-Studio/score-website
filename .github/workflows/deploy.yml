@@ -75,13 +75,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger deployment webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.DEPLOYMENT_WEBHOOK_URL }}
         run: |
-          if [ -z "${{ secrets.DEPLOYMENT_WEBHOOK_URL }}" ]; then
+          # Secrets go through `env:`, never interpolated straight into the script — a
+          # value with a stray newline (e.g. pasted with a trailing Enter) would otherwise
+          # corrupt the templated script itself before the shell ever sees it.
+          WEBHOOK_URL="$(printf '%s' "$WEBHOOK_URL" | tr -d '\n\r')"
+          if [ -z "$WEBHOOK_URL" ]; then
             echo "DEPLOYMENT_WEBHOOK_URL secret is not set — skipping deployment trigger."
             exit 1
           fi
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-            "${{ secrets.DEPLOYMENT_WEBHOOK_URL }}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$WEBHOOK_URL")
           echo "Webhook responded with $STATUS"
           if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
             echo "Deployment webhook failed"
