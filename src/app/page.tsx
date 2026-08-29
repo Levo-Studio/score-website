@@ -9,7 +9,13 @@ import { Ipad } from "@/components/sections/Ipad";
 import { Privat } from "@/components/sections/Privat";
 import { Laden } from "@/components/sections/Laden";
 import { Code } from "@/components/sections/Code";
-import { GITHUB_APP_URL, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/constants";
+import {
+  APP_STORE_URL,
+  GITHUB_APP_URL,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/constants";
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -19,9 +25,11 @@ const structuredData = {
   operatingSystem: "iOS, iPadOS",
   description: SITE_DESCRIPTION,
   url: SITE_URL,
+  installUrl: APP_STORE_URL,
+  downloadUrl: APP_STORE_URL,
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
   publisher: { "@type": "Organization", name: "Levo Studio" },
-  sameAs: [GITHUB_APP_URL],
+  sameAs: [APP_STORE_URL, GITHUB_APP_URL],
 };
 
 export default function Home() {
