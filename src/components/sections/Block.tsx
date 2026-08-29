@@ -44,7 +44,7 @@ export function Block() {
     <Section id="block">
       <Kicker index="003" label="Block I" />
       <MaskLines
-        className="font-display mt-6 max-w-[900px] text-[clamp(2.1rem,5vw,3.25rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
+        className="font-display mt-6 max-w-[900px] text-[clamp(1.85rem,7vw,3.25rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
         lines={["Punkte statt Noten.", <span key="l2" className="text-(--ink2)">So rechnet Baden-Württemberg.</span>]}
       />
       <Reveal delay={0.22} className="mt-6 max-w-[640px] text-[16px] leading-[1.7] text-(--ink2) text-pretty">
@@ -52,17 +52,21 @@ export function Block() {
         mit — vom belegten Kurs bis zur fertigen Note.
       </Reveal>
 
-      <Stagger className="mt-12 flex flex-wrap items-center gap-x-2 gap-y-4" step={0.08} y={16}>
+      <Stagger
+        className="mt-10 grid grid-cols-2 gap-3 sm:mt-12 sm:flex sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-4"
+        step={0.08}
+        y={16}
+      >
         {CHAIN.map((step, i) => (
           <div key={step.label} className="flex items-center gap-2">
-            <div className="flex flex-col items-center rounded-[20px] border border-(--line) bg-(--sf) px-5 py-4 text-center">
+            <div className="flex flex-1 flex-col items-center rounded-[20px] border border-(--line) bg-(--sf) px-4 py-4 text-center sm:flex-none sm:px-5">
               <div className="font-display text-[26px] leading-none font-extrabold tracking-[-0.03em] tabular-nums text-(--acc)">
                 {step.n}
               </div>
-              <div className="mt-2 text-[11.5px] whitespace-nowrap text-(--ink2)">{step.label}</div>
+              <div className="mt-2 text-[11.5px] text-(--ink2) sm:whitespace-nowrap">{step.label}</div>
             </div>
             {i < CHAIN.length - 1 && (
-              <span className="text-[18px] text-(--ink2)" aria-hidden="true">
+              <span className="hidden text-[18px] text-(--ink2) sm:inline" aria-hidden="true">
                 →
               </span>
             )}
@@ -72,7 +76,7 @@ export function Block() {
 
       <Stagger className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2" step={0.12}>
         {GAUGES.map((g) => (
-          <div key={g.title} className={`${cardShell} ${hoverCard} px-7 py-7`}>
+          <div key={g.title} className={`${cardShell} ${hoverCard} px-5 py-6 sm:px-7 sm:py-7`}>
             <div className="flex items-baseline justify-between">
               <span className="font-display text-[15.5px] font-semibold">{g.title}</span>
               <span className="flex items-baseline gap-1.5">
@@ -101,8 +105,8 @@ export function Block() {
       </Stagger>
 
       <Reveal delay={0.1} className="mt-8">
-        <div className={`${cardShell} px-7 py-7`}>
-          <div className="flex items-baseline justify-between">
+        <div className={`${cardShell} px-5 py-6 sm:px-7 sm:py-7`}>
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
             <span className="font-display text-[15.5px] font-semibold">Kursblock + Prüfungsblock → Note</span>
             <span className="text-[12px] text-(--ink2)">amtliche Tabelle, Schritte von 18 Punkten</span>
           </div>

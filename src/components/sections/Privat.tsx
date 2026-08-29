@@ -18,9 +18,9 @@ export function Privat() {
     <Section id="privat">
       <Kicker index="006" label="Datenschutz" />
       <div className="mt-7 flex flex-wrap items-start gap-16">
-        <div className="min-w-[320px] flex-1">
+        <div className="w-full min-w-0 flex-1 sm:min-w-[320px]">
           <MaskLines
-            className="font-display max-w-[440px] text-[clamp(1.9rem,4.4vw,2.875rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
+            className="font-display max-w-[440px] text-[clamp(1.8rem,7vw,2.875rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
             lines={["Kein Konto.", <span key="l2" className="text-(--ink2)">Keine Anmeldung.</span>]}
           />
           <Reveal delay={0.24} className="mt-6 max-w-[460px] text-[15.5px] leading-[1.7] text-(--ink2) text-pretty">

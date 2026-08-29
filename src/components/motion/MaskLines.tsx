@@ -39,7 +39,7 @@ export function MaskLines({
         <span
           key={i}
           data-mask-line
-          className={`block w-max max-w-none whitespace-nowrap ${lineClassName ?? ""}`}
+          className={`block max-w-full text-balance lg:w-max lg:max-w-none lg:whitespace-nowrap ${lineClassName ?? ""}`}
         >
           {line}
         </span>

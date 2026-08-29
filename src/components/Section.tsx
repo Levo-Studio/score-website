@@ -11,7 +11,7 @@ export function Section({
   last?: boolean;
 }) {
   return (
-    <section id={id} className={`mx-auto max-w-[1240px] px-6 sm:px-10 ${last ? "py-24 pb-28" : "py-24"}`}>
+    <section id={id} className={`mx-auto max-w-[1240px] px-6 sm:px-10 ${last ? "py-16 pb-20 sm:py-24 sm:pb-28" : "py-16 sm:py-24"}`}>
       {children}
     </section>
   );

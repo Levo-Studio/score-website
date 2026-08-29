@@ -23,7 +23,7 @@ export function Code() {
     <Section id="code">
       <Kicker index="008" label="Quellcode" />
       <MaskLines
-        className="font-display mt-6 max-w-[900px] text-[clamp(2.1rem,5vw,3.25rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
+        className="font-display mt-6 max-w-[900px] text-[clamp(1.85rem,7vw,3.25rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
         lines={["Der Code ist einsehbar.", <span key="l2" className="text-(--ink2)">App und Website auf GitHub.</span>]}
       />
       <Reveal delay={0.22} className="mt-6 max-w-[700px] text-[16px] leading-[1.7] text-(--ink2) text-pretty">
@@ -33,7 +33,7 @@ export function Code() {
       </Reveal>
       <Stagger className="mt-11 grid max-w-[820px] grid-cols-1 gap-4 sm:grid-cols-2" step={0.12}>
         {REPOS.map((r) => (
-          <a key={r.name} href={r.href} className={`block ${cardShell} ${hoverCard} px-[26px] py-6`}>
+          <a key={r.name} href={r.href} className={`block ${cardShell} ${hoverCard} px-5 py-5 sm:px-[26px] sm:py-6`}>
             <div className="flex items-center justify-between gap-3.5">
               <span className="font-display text-[15px] leading-[1.3] font-semibold">{r.name}</span>
               <span className="text-[15px] text-(--ink2)">↗</span>

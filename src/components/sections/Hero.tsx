@@ -64,36 +64,41 @@ export function Hero() {
         className="pointer-events-none absolute -top-[180px] -left-[140px] h-[860px] w-[860px] rounded-full"
         style={{ background: "radial-gradient(circle, var(--glow) 0%, transparent 64%)" }}
       />
-      <div className="relative mx-auto flex max-w-[1240px] flex-wrap items-center gap-16 px-6 py-24 sm:px-10 sm:pt-28 sm:pb-28">
-        <div className="min-w-[320px] flex-1">
+      <div className="relative mx-auto flex max-w-[1240px] flex-wrap items-center gap-12 px-6 py-16 sm:gap-16 sm:px-10 sm:pt-28 sm:pb-28">
+        <div className="w-full min-w-0 flex-1 sm:min-w-[320px]">
           <Reveal className="flex items-center gap-3 text-[12.5px] font-medium text-(--ink2)">
             <span className="h-[7px] w-[7px] flex-none rounded-full bg-(--acc) [animation:sc-blink_2.6s_ease-in-out_infinite]" />
             <span>iPhone und iPad · kostenlos</span>
           </Reveal>
 
           <MaskLines
-            className="mt-6 font-display max-w-[560px] text-[clamp(2.75rem,6.5vw,4.625rem)] leading-[1.04] font-extrabold tracking-[-0.05em]"
+            className="mt-6 font-display max-w-[560px] text-[clamp(2.35rem,9vw,4.625rem)] leading-[1.04] font-extrabold tracking-[-0.05em]"
             lines={["Dein Abischnitt.", <span key="l2" className="text-(--ink2)">Live mitgerechnet.</span>]}
           />
 
-          <Reveal delay={0.24} className="mt-6 max-w-[520px] text-[19px] leading-[1.6] text-(--ink2) text-pretty">
+          <Reveal delay={0.24} className="mt-6 max-w-[520px] text-[17px] leading-[1.6] text-(--ink2) text-pretty sm:text-[19px]">
             Noten eintragen, Score rechnet Block I und den Prüfungsblock. Klassenarbeiten,
             Tests, Projekte und mündliche Noten mit eigener Gewichtung — für die Kursstufe
             in Baden-Württemberg.
           </Reveal>
 
           <Reveal delay={0.32} className="mt-9 flex flex-wrap items-center gap-3.5">
-            <a href={APP_STORE_URL || "#laden"} className={`px-6 py-[18px] text-[14.5px] ${btnPrimary}`}>
+            <a
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener"
+              className={`w-full px-6 py-[18px] text-[14.5px] sm:w-auto ${btnPrimary}`}
+            >
               Im App Store laden
             </a>
-            <a href="#eintragen" className={`px-[22px] py-[18px] text-[14.5px] ${btnOutline}`}>
+            <a href="#eintragen" className={`w-full px-[22px] py-[18px] text-[14.5px] sm:w-auto ${btnOutline}`}>
               Was es macht ↓
             </a>
           </Reveal>
 
-          <Stagger className="mt-11 flex flex-wrap gap-7">
+          <Stagger className="mt-10 grid grid-cols-2 gap-6 sm:mt-11 sm:flex sm:flex-wrap sm:gap-7">
             {HERO_FACTS.map((f) => (
-              <div key={f.label}>
+              <div key={f.label} className="last:col-span-2 sm:last:col-span-1">
                 <div className="font-display text-[19px] font-semibold tabular-nums">{f.value}</div>
                 <div className="mt-2 text-[12.5px] text-(--ink2)">{f.label}</div>
               </div>
@@ -102,7 +107,7 @@ export function Hero() {
         </div>
 
         <div ref={cardWrapRef} className="w-full flex-none sm:w-[452px]">
-          <div className="rounded-[28px] border border-(--line) bg-(--sf) p-7 sm:p-[30px]">
+          <div className="rounded-[28px] border border-(--line) bg-(--sf) p-6 sm:p-[30px]">
             <div className="flex items-center justify-between text-[12px] font-medium text-(--ink2)">
               <span>Erwarteter Abischnitt</span>
               <span className="text-(--acc)">↑ 0,2</span>

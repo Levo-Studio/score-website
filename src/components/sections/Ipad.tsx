@@ -15,10 +15,10 @@ export function Ipad() {
   return (
     <Section id="ipad">
       <Kicker index="005" label="iPad" />
-      <div className="mt-7 flex flex-wrap items-center gap-16">
-        <div className="min-w-[300px] flex-1">
+      <div className="mt-7 flex flex-wrap items-center gap-10 sm:gap-16">
+        <div className="w-full min-w-0 flex-1 sm:min-w-[320px]">
           <MaskLines
-            className="font-display max-w-[440px] text-[clamp(1.9rem,4.4vw,2.875rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
+            className="font-display max-w-[440px] text-[clamp(1.8rem,7vw,2.875rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
             lines={["Auf dem iPad", <span key="l2" className="text-(--ink2)">alles gleichzeitig.</span>]}
           />
           <Reveal delay={0.24} className="mt-6 max-w-[460px] text-[15.5px] leading-[1.7] text-(--ink2) text-pretty">
@@ -29,9 +29,9 @@ export function Ipad() {
         </div>
 
         <Reveal className="w-full flex-none sm:w-[520px]">
-          <div className="rounded-[26px] border border-(--line) bg-(--sf) p-4">
-            <div className="flex gap-3">
-              <div className="flex w-[112px] flex-none flex-col gap-[7px] rounded-[14px] bg-(--sf2) px-2.5 py-3">
+          <div className="overflow-hidden rounded-[26px] border border-(--line) bg-(--sf) p-3 sm:p-4">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="flex w-[76px] flex-none flex-col gap-[7px] rounded-[14px] bg-(--sf2) px-2 py-3 sm:w-[112px] sm:px-2.5">
                 {SIDE_COLORS.map((c, i) => (
                   <div key={c} className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 flex-none rounded-[4px]" style={{ background: c }} />
@@ -60,11 +60,14 @@ export function Ipad() {
                     ))}
                   </div>
                 </div>
-                <div className="flex gap-2 rounded-[14px] bg-(--sf2) p-3">
-                  {CARDS.map((c) => (
-                    <div key={c.name} className="flex-1 rounded-xl border border-(--line) bg-(--sf) p-2.5">
+                <div className="flex gap-1.5 rounded-[14px] bg-(--sf2) p-2 sm:gap-2 sm:p-3">
+                  {CARDS.map((c, i) => (
+                    <div
+                      key={c.name}
+                      className={`min-w-0 flex-1 rounded-xl border border-(--line) bg-(--sf) p-2 sm:p-2.5 ${i === CARDS.length - 1 ? "hidden sm:block" : ""}`}
+                    >
                       <div className="h-[18px] w-[18px] rounded-[7px]" style={{ background: c.c }} />
-                      <div className="mt-2.5 text-[9px] font-semibold">{c.name}</div>
+                      <div className="mt-2.5 truncate text-[9px] font-semibold">{c.name}</div>
                       <div className="font-display mt-1.5 text-[15px] font-extrabold">{c.val}</div>
                     </div>
                   ))}

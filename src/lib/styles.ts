@@ -17,7 +17,8 @@ export const btnOutline =
   "transition-[background-size,color,border-color] duration-400 ease-out " +
   "hover:bg-[length:100%_100%] hover:text-(--acc-ink) hover:border-(--acc)";
 
-export const cardShell = "rounded-[28px] border border-(--line) bg-(--sf) p-7";
+export const cardShell =
+  "rounded-[28px] border border-(--line) bg-(--sf) p-5 sm:p-7";
 
 // Kachel-Hover: Rand wird zur Akzentfarbe, ein 2px-Strich läuft oben ein.
 export const hoverCard =

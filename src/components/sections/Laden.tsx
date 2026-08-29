@@ -9,11 +9,16 @@ export function Laden() {
     <Section id="laden" last>
       <Kicker index="007" label="Laden" />
       <MaskLines
-        className="font-display mt-6 max-w-[900px] text-[clamp(2.1rem,5vw,3.25rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
+        className="font-display mt-6 max-w-[900px] text-[clamp(1.85rem,7vw,3.25rem)] leading-[1.1] font-extrabold tracking-[-0.04em]"
         lines={["Einmal einrichten,", <span key="l2" className="text-(--ink2)">dann nur noch Noten eintragen.</span>]}
       />
       <Reveal delay={0.24} className="mt-10 flex flex-wrap items-center gap-4">
-        <a href={APP_STORE_URL || "#top"} className={`px-7 py-[19px] text-[15px] ${btnPrimary}`}>
+        <a
+          href={APP_STORE_URL}
+          target="_blank"
+          rel="noopener"
+          className={`w-full px-7 py-[19px] text-[15px] sm:w-auto ${btnPrimary}`}
+        >
           Im App Store laden
         </a>
         <span className="text-[13.5px] text-(--ink2)">
