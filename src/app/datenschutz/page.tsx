@@ -11,7 +11,7 @@ export default function DatenschutzPage() {
     <LegalLayout
       eyebrow="Datenschutzerklärung"
       title="Deine Noten bleiben bei dir"
-      intro="Stand: August 2026. Kurz gesagt: kein Konto, kein Server, keine Analytics. Score speichert alles auf deinem Gerät und synchronisiert es über deine eigene iCloud."
+      intro="Stand: Oktober 2026. Kurz gesagt: kein Konto, kein Server, keine Analytics. Score speichert alles auf deinem Gerät und synchronisiert es über deine eigene iCloud."
     >
       <LegalBlock label="Wo deine Noten liegen">
         <LegalPara>
@@ -54,9 +54,13 @@ export default function DatenschutzPage() {
 
       <LegalBlock label="Diese Website">
         <LegalPara>
-          Kein Tracking, keine Cookies, kein Consent-Banner. Der Hoster speichert technisch
-          notwendige Zugriffsdaten in Server-Logs, gehostet in Europa. Diese Logs werden nicht
-          mit deiner Nutzung der App verknüpft.
+          Kein Tracking, keine Cookies, kein Consent-Banner. Die Website läuft bei Scaleway SAS
+          (Paris, Frankreich) in Rechenzentren in Amsterdam (Niederlande). Um die Seiten
+          auszuliefern und abzusichern, verarbeitet Scaleway in unserem Auftrag (Art. 28 DSGVO)
+          kurzzeitig technisch notwendige Zugriffsdaten in Server-Logs: IP-Adresse, Zeitpunkt,
+          aufgerufene Seite und Browser. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Die
+          Namensauflösung (DNS) übernimmt DNScale OÜ (Tallinn, Estland). Diese Daten werden
+          nicht mit deiner Nutzung der App verknüpft.
         </LegalPara>
       </LegalBlock>
 
