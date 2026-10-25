@@ -28,7 +28,7 @@ test("runtime listens on port 6239", () => {
 });
 
 test("runtime health check probes /api/health", () => {
-  assert.deepEqual(instructions.filter((instruction) => /^HEALTHCHECK /.test(instruction)), [
+  assert.deepEqual(inRuntime(/^HEALTHCHECK /), [
     "HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 " +
       "CMD wget --spider -q http://127.0.0.1:6239/api/health || exit 1",
   ]);
