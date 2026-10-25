@@ -76,27 +76,48 @@ test("/sitemap.xml lists every page", async ({ request }) => {
 
 test("theme toggle switches the theme and keeps it across reloads", async ({ page }) => {
   const html = page.locator("html");
+  const toggle = page.getByRole("navigation").getByRole("button");
   const storedTheme = () => page.evaluate(() => localStorage.getItem("score-theme"));
 
   await page.goto("/");
   await page.waitForLoadState("networkidle");
   await expect(html).not.toHaveAttribute("data-theme", "light");
+  await expect(toggle).toHaveAccessibleName("Zu hellem Design wechseln");
   expect(await storedTheme()).toBeNull();
 
-  await page.getByRole("button", { name: "Zu hellem Design wechseln" }).click();
+  await toggle.click();
   await expect(html).toHaveAttribute("data-theme", "light");
+  await expect(toggle).toHaveAccessibleName("Zu dunklem Design wechseln");
   expect(await storedTheme()).toBe("light");
 
   await page.reload();
   await page.waitForLoadState("networkidle");
   await expect(html).toHaveAttribute("data-theme", "light");
 
-  await page.getByRole("button", { name: /^Zu (hellem|dunklem) Design wechseln$/ }).click();
+  await toggle.click();
   await expect(html).toHaveAttribute("data-theme", "dark");
   expect(await storedTheme()).toBe("dark");
 
   await page.reload();
   await expect(html).toHaveAttribute("data-theme", "dark");
+});
+
+test("theme toggle reflects a stored light theme after reload", async ({ page }) => {
+  test.fail(
+    true,
+    "Known bug: the useState initialiser in src/lib/theme.ts reads the stored light theme on the client, " +
+      "but the hydrated toggle keeps the attributes of the server render (dark).",
+  );
+  await page.goto("/");
+  await page.evaluate(() => localStorage.setItem("score-theme", "light"));
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+  await expect(page.getByRole("navigation").getByRole("button")).toHaveAttribute(
+    "aria-label",
+    "Zu dunklem Design wechseln",
+  );
 });
 
 test("unknown routes answer with 404", async ({ page }) => {
