@@ -84,6 +84,17 @@ jobs:
           echo "Container did not answer /api/health with 200."
           exit 1
 
+      - name: Check pages and assets
+        run: |
+          set -euo pipefail
+          BASE="http://127.0.0.1:6239"
+          HTML="$(curl --fail --silent --show-error --max-time 10 "${BASE}/")"
+          ASSET="$(grep -oE '/_next/static/[^"]+\.(css|js)' <<<"$HTML" | sed -n 1p)"
+          for path in / /datenschutz /impressum "$ASSET" /score-og-1200x630.png; do
+            curl --fail --silent --show-error --max-time 10 --output /dev/null "${BASE}${path}"
+            echo "200 ${path}"
+          done
+
       - name: Container logs
         if: failure()
         run: docker logs score-website
