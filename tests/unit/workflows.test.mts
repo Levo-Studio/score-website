@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 
 const workflowsDir = new URL("../../.github/workflows/", import.meta.url);
 const readWorkflow = (name: string) => readFileSync(new URL(name, workflowsDir), "utf8");
+const allWorkflows = readdirSync(workflowsDir).filter((name) => /\.ya?ml$/.test(name));
+
+const WORKFLOWS_WITH_SHA_PINNED_ACTIONS = ["ci.yml"];
 
 // Lines of a top-level YAML key's block, without blank and comment-only lines.
 function topLevelBlock(source: string, key: string): string[] {
@@ -53,4 +56,32 @@ test("deploy updates the Scaleway container only when one is configured", () => 
     ),
     "Scaleway container API call missing",
   );
+});
+
+for (const name of WORKFLOWS_WITH_SHA_PINNED_ACTIONS) {
+  test(`${name} pins every action to a full commit SHA and names its version`, () => {
+    const refs = [...readWorkflow(name).matchAll(/^\s*(?:-\s+)?uses:\s*(.*)$/gm)].map((m) => m[1].trim());
+    assert.ok(refs.length > 0, `${name} uses no actions`);
+    for (const ref of refs) {
+      assert.match(ref, /^[\w.-]+\/[\w./-]+@[0-9a-f]{40} # v\d+\.\d+\.\d+$/);
+    }
+  });
+}
+
+test("CI uses the Node major of the Docker base image", () => {
+  const dockerfile = readFileSync(new URL("../../Dockerfile.dokploy", import.meta.url), "utf8");
+  const dockerMajors = new Set([...dockerfile.matchAll(/^FROM node:(\d+)\b/gm)].map((m) => m[1]));
+  assert.equal(dockerMajors.size, 1, "Dockerfile must use exactly one Node major");
+  const [dockerMajor] = dockerMajors;
+
+  let setupNodeSteps = 0;
+  for (const name of allWorkflows) {
+    const source = readWorkflow(name);
+    const steps = source.match(/uses:\s*actions\/setup-node@/g)?.length ?? 0;
+    const majors = [...source.matchAll(/^\s*node-version:\s*["']?(\d+)\b/gm)].map((m) => m[1]);
+    assert.equal(majors.length, steps, `${name}: every setup-node step needs a node-version`);
+    for (const major of majors) assert.equal(major, dockerMajor, `${name} uses Node ${major}`);
+    setupNodeSteps += steps;
+  }
+  assert.ok(setupNodeSteps > 0, "no workflow sets up Node");
 });
