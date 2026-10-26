@@ -6,8 +6,6 @@ const workflowsDir = new URL("../../.github/workflows/", import.meta.url);
 const readWorkflow = (name: string) => readFileSync(new URL(name, workflowsDir), "utf8");
 const allWorkflows = readdirSync(workflowsDir).filter((name) => /\.ya?ml$/.test(name));
 
-const WORKFLOWS_WITH_SHA_PINNED_ACTIONS = ["ci.yml", "deploy.yml"];
-
 // Lines of a top-level YAML key's block, without blank and comment-only lines.
 function topLevelBlock(source: string, key: string): string[] {
   const lines = source.split(/\r?\n/);
@@ -59,14 +57,33 @@ test("deploy updates the Scaleway container only when one is configured", () => 
 });
 
 // Every `uses:` value of a workflow, e.g. "actions/checkout@<sha> # v1.2.3".
-const actionRefs = (source: string) =>
-  [...source.matchAll(/^\s*(?:-\s+)?uses:\s*(.*)$/gm)].map((m) => m[1].trim());
+// Any other line with a `uses:` key (a flow mapping, for instance) fails, so no
+// reference escapes the checks. Comments and block scalars (run scripts) are skipped.
+function actionRefs(name: string, source: string): string[] {
+  const refs: string[] = [];
+  let scalarIndent = -1;
+  for (const line of source.split(/\r?\n/)) {
+    const indent = line.search(/\S/);
+    if (scalarIndent !== -1 && (indent === -1 || indent > scalarIndent)) continue;
+    scalarIndent = -1;
+    const code = line.replace(/(^|\s)#.*$/, "");
+    if (code.trim() === "") continue;
+    if (/:\s*[|>][-+\d]*\s*$/.test(code)) {
+      scalarIndent = indent;
+      continue;
+    }
+    if (/^\s*(?:-\s+)?run\s*:/.test(code)) continue;
+    if (!/\buses\s*:/.test(code)) continue;
+    const ref = line.match(/^\s*(?:-\s+)?uses:\s*(.*)$/);
+    assert.ok(ref, `${name}: unrecognised "uses:" line: ${line.trim()}`);
+    refs.push(ref[1].trim());
+  }
+  return refs;
+}
 
-for (const name of WORKFLOWS_WITH_SHA_PINNED_ACTIONS) {
+for (const name of allWorkflows) {
   test(`${name} pins every action to a full commit SHA and names its version`, () => {
-    const refs = actionRefs(readWorkflow(name));
-    assert.ok(refs.length > 0, `${name} uses no actions`);
-    for (const ref of refs) {
+    for (const ref of actionRefs(name, readWorkflow(name))) {
       assert.match(ref, /^[\w.-]+\/[\w./-]+@[0-9a-f]{40} # v\d+\.\d+\.\d+$/);
     }
   });
@@ -75,7 +92,7 @@ for (const name of WORKFLOWS_WITH_SHA_PINNED_ACTIONS) {
 test("workflows pin each action to the same commit and version", () => {
   const pins = new Map<string, Map<string, Set<string>>>();
   for (const name of allWorkflows) {
-    for (const ref of actionRefs(readWorkflow(name))) {
+    for (const ref of actionRefs(name, readWorkflow(name))) {
       const at = ref.indexOf("@");
       const action = at === -1 ? ref : ref.slice(0, at);
       const pin = at === -1 ? "" : ref.slice(at + 1);
