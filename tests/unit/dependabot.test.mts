@@ -10,102 +10,133 @@ const lines = config
   .map((line) => line.replace(/\s+#.*$/, "").trimEnd())
   .filter((line) => line.trim() !== "" && !line.trim().startsWith("#"));
 
+type Node = string | Node[] | { [key: string]: Node };
+
+const KEY = /^([\w-]+):(?:\s+(.*))?$/;
 const indent = (line: string) => line.length - line.trimStart().length;
+const unquote = (value: string) => value.replace(/^(["'])(.*)\1$/, "$2");
 
-// The lines nested under block[start].
-function childrenOf(block: string[], start: number): string[] {
-  const end = block.findIndex((line, i) => i > start && indent(line) <= indent(block[start]));
-  return block.slice(start + 1, end === -1 ? undefined : end);
+// A scalar, or a flow list of scalars such as [minor, "patch"].
+function scalar(value: string): Node {
+  const flow = value.match(/^\[(.*)\]$/);
+  if (!flow) return unquote(value);
+  return flow[1]
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item !== "")
+    .map(unquote);
 }
 
-// The lines nested under the first "key:" line of a block.
-function section(block: string[], key: string): string[] {
-  const start = block.findIndex((line) => line.trim() === `${key}:`);
-  assert.notEqual(start, -1, `missing "${key}:"`);
-  return childrenOf(block, start);
-}
+// Reads the block-style YAML subset Dependabot configs use: mappings,
+// sequences (also at the indentation of their key), scalars and flow lists.
+function parse(block: string[]): Node {
+  if (block.length === 0) return "";
+  const base = indent(block[0]);
+  const isSequence = block[0].trimStart().startsWith("-");
+  const heads = block.flatMap((line, i) =>
+    indent(line) === base && line.trimStart().startsWith("-") === isSequence ? [i] : [],
+  );
+  const parts = heads.map((head, n) => block.slice(head, heads[n + 1]));
 
-// The direct "key: value" entries of a section, values unquoted.
-function entries(block: string[]): Record<string, string> {
-  const top = Math.min(...block.map(indent));
+  if (isSequence) {
+    return parts.map(([first, ...rest]) => {
+      // "- key: value" reads like the other keys of its item once the dash is gone.
+      const item = [first.replace("-", " "), ...rest];
+      return item.length === 1 && !KEY.test(item[0].trim()) ? scalar(item[0].trim()) : parse(item);
+    });
+  }
   return Object.fromEntries(
-    block
-      .filter((line) => indent(line) === top)
-      .map((line) => {
-        const [, key, value] = line.trim().match(/^([\w-]+):\s*(.*)$/) ?? [];
-        assert.ok(key, `not a key: ${line.trim()}`);
-        return [key, value.replace(/^(["'])(.*)\1$/, "$2")];
-      }),
+    parts.map(([first, ...rest]) => {
+      const [, key, value] = first.trim().match(KEY) ?? [];
+      assert.ok(key, `not a key: ${first.trim()}`);
+      return [key, value === undefined ? parse(rest) : scalar(value)];
+    }),
   );
 }
 
-// "[a, b]" as a list.
-const flowList = (value: string) =>
-  value
-    .replace(/^\[(.*)\]$/, "$1")
-    .split(",")
-    .map((item) => item.trim())
-    .filter((item) => item !== "");
+function mapping(node: Node | undefined, what: string): Record<string, Node> {
+  assert.ok(typeof node === "object" && !Array.isArray(node), `${what} is not a mapping`);
+  return node;
+}
+
+function strings(node: Node | undefined, what: string): string[] {
+  assert.ok(Array.isArray(node), `${what} is not a list`);
+  return node.map((item) => {
+    assert.equal(typeof item, "string", `${what} holds a non-scalar item`);
+    return item as string;
+  });
+}
+
+const dependabot = mapping(parse(lines), ".github/dependabot.yml");
+
+const updates = () => {
+  assert.ok(Array.isArray(dependabot.updates), "updates is not a list");
+  return dependabot.updates.map((update) => mapping(update, "an update"));
+};
 
 const ECOSYSTEMS = ["docker", "github-actions", "npm"];
 
-const updates = new Map<string, string[]>();
-lines.forEach((line, i) => {
-  const match = line.match(/^\s*- package-ecosystem:\s*["']?([\w-]+)["']?$/);
-  if (!match) return;
-  assert.ok(!updates.has(match[1]), `${match[1]} is configured twice`);
-  updates.set(match[1], childrenOf(lines, i));
-});
-
 test("Dependabot uses config version 2", () => {
-  assert.ok(lines.includes("version: 2"));
+  assert.equal(dependabot.version, "2");
 });
 
 test("Dependabot updates exactly GitHub Actions, npm and Docker", () => {
-  assert.deepEqual([...updates.keys()].sort(), ECOSYSTEMS);
+  assert.deepEqual(updates().map((update) => update["package-ecosystem"]).sort(), ECOSYSTEMS);
 });
 
 for (const ecosystem of ECOSYSTEMS) {
-  const block = () => {
-    const found = updates.get(ecosystem);
+  const update = () => {
+    const found = updates().find((candidate) => candidate["package-ecosystem"] === ecosystem);
     assert.ok(found, `${ecosystem} is not configured`);
     return found;
   };
 
   test(`${ecosystem} updates the repository root once a week in Berlin time`, () => {
-    assert.equal(entries(block()).directory, "/");
-    const schedule = entries(section(block(), "schedule"));
+    const { directory, directories } = update();
+    assert.ok((directory === undefined) !== (directories === undefined), "set directory or directories");
+    assert.deepEqual(directory === undefined ? strings(directories, "directories") : [directory], ["/"]);
+
+    const schedule = mapping(update().schedule, "schedule");
     assert.equal(schedule.interval, "weekly");
     assert.equal(schedule.timezone, "Europe/Berlin");
-    assert.match(schedule.day, /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/);
-    assert.match(schedule.time, /^\d{2}:\d{2}$/);
+    assert.match(String(schedule.day), /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/);
+    assert.match(String(schedule.time), /^\d{2}:\d{2}$/);
   });
 
   test(`${ecosystem} groups all minor and patch updates into one pull request`, () => {
-    const groups = section(block(), "groups");
-    const names = Object.keys(entries(groups));
+    const groups = mapping(update().groups, "groups");
+    const names = Object.keys(groups);
     assert.equal(names.length, 1, `expected one group, got ${names.join(", ")}`);
+    const {
+      "update-types": updateTypes,
+      "applies-to": appliesTo = "version-updates",
+      ...filters
+    } = mapping(groups[names[0]], `group ${names[0]}`);
     // No patterns or dependency-type filter: every minor and patch update belongs to it.
-    const rules = entries(section(groups, names[0]));
-    assert.deepEqual(Object.keys(rules), ["update-types"]);
-    assert.deepEqual(flowList(rules["update-types"]).sort(), ["minor", "patch"]);
+    assert.deepEqual(Object.keys(filters), []);
+    assert.equal(appliesTo, "version-updates");
+    assert.deepEqual(strings(updateTypes, "update-types").sort(), ["minor", "patch"]);
   });
 
   test(`${ecosystem} opens a separate pull request for each major update`, () => {
-    const groups = section(block(), "groups");
-    for (const name of Object.keys(entries(groups))) {
-      const updateTypes = entries(section(groups, name))["update-types"];
-      assert.ok(updateTypes, `group ${name} has no update-types and would take major updates`);
-      assert.ok(!flowList(updateTypes).includes("major"), `group ${name} takes major updates`);
+    for (const [name, group] of Object.entries(mapping(update().groups, "groups"))) {
+      const updateTypes = mapping(group, `group ${name}`)["update-types"];
+      assert.ok(updateTypes !== undefined, `group ${name} has no update-types and would take major updates`);
+      assert.ok(!strings(updateTypes, "update-types").includes("major"), `group ${name} takes major updates`);
     }
   });
 
   test(`${ecosystem} commits start with the deps prefix`, () => {
     // Without prefix-development the prefix applies to devDependencies as well.
-    assert.deepEqual(entries(section(block(), "commit-message")), { prefix: "deps" });
+    const {
+      prefix,
+      "prefix-development": prefixDevelopment = prefix,
+      ...rest
+    } = mapping(update()["commit-message"], "commit-message");
+    assert.deepEqual({ prefix, prefixDevelopment, rest }, { prefix: "deps", prefixDevelopment: "deps", rest: {} });
   });
 
   test(`${ecosystem} version updates are not switched off`, () => {
-    assert.notEqual(entries(block())["open-pull-requests-limit"], "0");
+    assert.notEqual(update()["open-pull-requests-limit"], "0");
   });
 }
