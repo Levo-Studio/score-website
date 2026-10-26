@@ -57,8 +57,9 @@ test("deploy updates the Scaleway container only when one is configured", () => 
 });
 
 // Every `uses:` value of a workflow, e.g. "actions/checkout@<sha> # v1.2.3".
-// Any other line with a `uses:` key (a flow mapping, for instance) fails, so no
-// reference escapes the checks. Comments and block scalars (run scripts) are skipped.
+// A `uses` key in any other form (quoted, flow mapping, block scalar) throws, so no
+// reference escapes the checks. Comments, expressions and block scalars such as run
+// scripts are skipped; "uses:" inside a value does not count.
 function actionRefs(name: string, source: string): string[] {
   const refs: string[] = [];
   let scalarIndent = -1;
@@ -66,25 +67,91 @@ function actionRefs(name: string, source: string): string[] {
     const indent = line.search(/\S/);
     if (scalarIndent !== -1 && (indent === -1 || indent > scalarIndent)) continue;
     scalarIndent = -1;
-    const code = line.replace(/(^|\s)#.*$/, "");
-    if (code.trim() === "") continue;
-    if (/:\s*[|>][-+\d]*\s*$/.test(code)) {
+    const code = line.replace(/(^|\s)#.*$/, "").replace(/\$\{\{.*?\}\}/g, "");
+    const usesKey =
+      /^\s*(?:-\s+)*["']?uses["']?\s*:/.test(code) ||
+      (code.includes("{") && /[{,]\s*["']?uses["']?\s*:/.test(code));
+    if (usesKey) {
+      const ref = line.match(/^\s*(?:-\s+)?uses:\s+([\w.].*)$/);
+      assert.ok(ref, `${name}: unrecognised "uses:" line: ${line.trim()}`);
+      refs.push(ref[1].trim());
+    } else if (/^\s*(?:-\s+)*["']?[\w-]+["']?\s*:\s*[|>][-+\d]*\s*$/.test(code)) {
       scalarIndent = indent;
-      continue;
     }
-    if (/^\s*(?:-\s+)?run\s*:/.test(code)) continue;
-    if (!/\buses\s*:/.test(code)) continue;
-    const ref = line.match(/^\s*(?:-\s+)?uses:\s*(.*)$/);
-    assert.ok(ref, `${name}: unrecognised "uses:" line: ${line.trim()}`);
-    refs.push(ref[1].trim());
   }
   return refs;
 }
 
+const PINNED_ACTION = /^[\w.-]+\/[\w./-]+@[0-9a-f]{40} # v\d+\.\d+\.\d+$/;
+const FIXTURE_SHA = "0123456789abcdef0123456789abcdef01234567";
+
+test("action reference extraction reads only real uses keys", () => {
+  const workflow = [
+    "jobs:",
+    "  build:",
+    "    steps:",
+    "      # - uses: actions/cache@v4",
+    '      - name: "Count uses: in repo"',
+    "        if: contains(github.ref, 'uses:') && ${{ format('{uses: x}') }}",
+    "        run: |",
+    '          echo "uses: actions/cache@v4"',
+    "          - uses: not/a@step",
+    `      - uses: actions/checkout@${FIXTURE_SHA} # v1.2.3`,
+    "        with:",
+    "          key: uses:foo",
+    "          script: >-",
+    "            uses: still/text@v1",
+    "      - uses: ./.github/actions/local",
+    "      - name: ratio a:>",
+    `        uses: docker/login-action@${FIXTURE_SHA} # v4.5.6`,
+    "  reuse:",
+    "    uses: ./.github/workflows/reusable.yml",
+  ].join("\n");
+  assert.deepEqual(actionRefs("fixture", workflow), [
+    `actions/checkout@${FIXTURE_SHA} # v1.2.3`,
+    "./.github/actions/local",
+    `docker/login-action@${FIXTURE_SHA} # v4.5.6`,
+    "./.github/workflows/reusable.yml",
+  ]);
+});
+
+test("action reference extraction rejects uses keys it cannot read", () => {
+  for (const step of [
+    "- {uses: actions/cache@v4}",
+    "- {name: cache, uses: actions/cache@v4}",
+    '- "uses": actions/cache@v4',
+    "- 'uses': actions/cache@v4",
+    "- uses: >-\n          actions/cache@v4",
+    "- uses:",
+  ]) {
+    assert.throws(() => actionRefs("fixture", `    steps:\n      ${step}\n`), /unrecognised "uses:" line/, step);
+  }
+});
+
+test("action reference extraction finds every action of the real workflows", () => {
+  const actions = (name: string) => actionRefs(name, readWorkflow(name)).map((ref) => ref.split("@")[0]);
+  assert.deepEqual(actions("ci.yml"), [
+    "actions/checkout",
+    "pnpm/action-setup",
+    "actions/setup-node",
+    "actions/checkout",
+  ]);
+  assert.deepEqual(actions("deploy.yml"), [
+    "actions/checkout",
+    "docker/setup-buildx-action",
+    "docker/login-action",
+    "docker/login-action",
+    "docker/metadata-action",
+    "docker/build-push-action",
+  ]);
+});
+
 for (const name of allWorkflows) {
   test(`${name} pins every action to a full commit SHA and names its version`, () => {
     for (const ref of actionRefs(name, readWorkflow(name))) {
-      assert.match(ref, /^[\w.-]+\/[\w./-]+@[0-9a-f]{40} # v\d+\.\d+\.\d+$/);
+      if (ref.startsWith("./")) continue;
+      assert.ok(!ref.startsWith("docker://"), `${name}: ${ref} is not allowed, a docker:// image would need a digest pin`);
+      assert.match(ref, PINNED_ACTION);
     }
   });
 }
