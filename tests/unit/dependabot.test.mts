@@ -4,11 +4,13 @@ import { test } from "node:test";
 
 const config = readFileSync(new URL("../../.github/dependabot.yml", import.meta.url), "utf8");
 
-// Lines with their indentation, without comments and blank lines.
+// Lines with their indentation, without comments, blank lines and a leading
+// document marker.
 const lines = config
   .split(/\r?\n/)
   .map((line) => line.replace(/\s+#.*$/, "").trimEnd())
-  .filter((line) => line.trim() !== "" && !line.trim().startsWith("#"));
+  .filter((line) => line.trim() !== "" && !line.trim().startsWith("#"))
+  .filter((line, i) => !(i === 0 && line === "---"));
 
 type Node = string | Node[] | { [key: string]: Node };
 
@@ -49,7 +51,9 @@ function parse(block: string[]): Node {
     parts.map(([first, ...rest]) => {
       const [, key, value] = first.trim().match(KEY) ?? [];
       assert.ok(key, `not a key: ${first.trim()}`);
-      return [key, value === undefined ? parse(rest) : scalar(value)];
+      if (value === undefined) return [key, parse(rest)];
+      assert.deepEqual(rest, [], `${key} has a value and nested lines`);
+      return [key, scalar(value)];
     }),
   );
 }
@@ -75,6 +79,10 @@ const updates = () => {
 };
 
 const ECOSYSTEMS = ["docker", "github-actions", "npm"];
+
+// Every other setting (allow, ignore, target-branch, versioning-strategy,
+// cooldown, open-pull-requests-limit, ...) would change what gets updated.
+const UPDATE_KEYS = ["commit-message", "directories", "directory", "groups", "package-ecosystem", "schedule"];
 
 test("Dependabot uses config version 2", () => {
   assert.equal(dependabot.version, "2");
@@ -127,12 +135,9 @@ for (const ecosystem of ECOSYSTEMS) {
   });
 
   test(`${ecosystem} updates every dependency against the default branch`, () => {
-    // An allow list or any ignore entry would hold updates back, e.g. ignoring
-    // version-update:semver-major would silently stop all major pull requests.
-    const { allow, ignore, "target-branch": targetBranch } = update();
-    assert.equal(allow, undefined, "allow restricts which dependencies are updated");
-    assert.equal(ignore, undefined, "ignore holds back updates");
-    assert.equal(targetBranch, undefined, "updates must target the default branch");
+    // E.g. ignoring version-update:semver-major would silently stop all major pull requests.
+    const unexpected = Object.keys(update()).filter((key) => !UPDATE_KEYS.includes(key));
+    assert.deepEqual(unexpected, [], `unexpected settings: ${unexpected.join(", ")}`);
   });
 
   test(`${ecosystem} commits start with the deps prefix`, () => {
@@ -143,9 +148,5 @@ for (const ecosystem of ECOSYSTEMS) {
       ...rest
     } = mapping(update()["commit-message"], "commit-message");
     assert.deepEqual({ prefix, prefixDevelopment, rest }, { prefix: "deps", prefixDevelopment: "deps", rest: {} });
-  });
-
-  test(`${ecosystem} version updates are not switched off`, () => {
-    assert.notEqual(update()["open-pull-requests-limit"], "0");
   });
 }
