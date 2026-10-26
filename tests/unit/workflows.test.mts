@@ -6,7 +6,7 @@ const workflowsDir = new URL("../../.github/workflows/", import.meta.url);
 const readWorkflow = (name: string) => readFileSync(new URL(name, workflowsDir), "utf8");
 const allWorkflows = readdirSync(workflowsDir).filter((name) => /\.ya?ml$/.test(name));
 
-const WORKFLOWS_WITH_SHA_PINNED_ACTIONS = ["ci.yml"];
+const WORKFLOWS_WITH_SHA_PINNED_ACTIONS = ["ci.yml", "deploy.yml"];
 
 // Lines of a top-level YAML key's block, without blank and comment-only lines.
 function topLevelBlock(source: string, key: string): string[] {
@@ -58,15 +58,38 @@ test("deploy updates the Scaleway container only when one is configured", () => 
   );
 });
 
+// Every `uses:` value of a workflow, e.g. "actions/checkout@<sha> # v1.2.3".
+const actionRefs = (source: string) =>
+  [...source.matchAll(/^\s*(?:-\s+)?uses:\s*(.*)$/gm)].map((m) => m[1].trim());
+
 for (const name of WORKFLOWS_WITH_SHA_PINNED_ACTIONS) {
   test(`${name} pins every action to a full commit SHA and names its version`, () => {
-    const refs = [...readWorkflow(name).matchAll(/^\s*(?:-\s+)?uses:\s*(.*)$/gm)].map((m) => m[1].trim());
+    const refs = actionRefs(readWorkflow(name));
     assert.ok(refs.length > 0, `${name} uses no actions`);
     for (const ref of refs) {
       assert.match(ref, /^[\w.-]+\/[\w./-]+@[0-9a-f]{40} # v\d+\.\d+\.\d+$/);
     }
   });
 }
+
+test("workflows pin each action to the same commit and version", () => {
+  const pins = new Map<string, Map<string, Set<string>>>();
+  for (const name of allWorkflows) {
+    for (const ref of actionRefs(readWorkflow(name))) {
+      const at = ref.indexOf("@");
+      const action = at === -1 ? ref : ref.slice(0, at);
+      const pin = at === -1 ? "" : ref.slice(at + 1);
+      const byPin = pins.get(action) ?? new Map<string, Set<string>>();
+      byPin.set(pin, (byPin.get(pin) ?? new Set<string>()).add(name));
+      pins.set(action, byPin);
+    }
+  }
+  assert.ok(pins.size > 0, "no workflow uses an action");
+  for (const [action, byPin] of pins) {
+    const found = [...byPin].map(([pin, names]) => `${pin} (${[...names].join(", ")})`).join("; ");
+    assert.equal(byPin.size, 1, `${action} is pinned differently: ${found}`);
+  }
+});
 
 test("CI uses the Node major of the Docker base image", () => {
   const dockerfile = readFileSync(new URL("../../Dockerfile.dokploy", import.meta.url), "utf8");
