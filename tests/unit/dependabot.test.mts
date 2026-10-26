@@ -126,6 +126,15 @@ for (const ecosystem of ECOSYSTEMS) {
     }
   });
 
+  test(`${ecosystem} updates every dependency against the default branch`, () => {
+    // An allow list or any ignore entry would hold updates back, e.g. ignoring
+    // version-update:semver-major would silently stop all major pull requests.
+    const { allow, ignore, "target-branch": targetBranch } = update();
+    assert.equal(allow, undefined, "allow restricts which dependencies are updated");
+    assert.equal(ignore, undefined, "ignore holds back updates");
+    assert.equal(targetBranch, undefined, "updates must target the default branch");
+  });
+
   test(`${ecosystem} commits start with the deps prefix`, () => {
     // Without prefix-development the prefix applies to devDependencies as well.
     const {
