@@ -1,6 +1,6 @@
 # Weekly version updates. Minor and patch updates of an ecosystem arrive as one
 # grouped pull request, every major update as its own. Security updates are
-# switched on in the repository settings and are not limited by this file.
+# controlled in the repository settings and are not limited by this file.
 version: 2
 
 updates:
