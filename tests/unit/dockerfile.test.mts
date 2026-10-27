@@ -38,7 +38,8 @@ test("base image is pinned by Node version, Alpine version and digest", () => {
 test("pnpm is installed from the packageManager field in package.json", () => {
   assert.doesNotMatch(dockerfile, /corepack/i, "Node 26 images ship without corepack");
   assert.doesNotMatch(dockerfile, /pnpm@\d/, "the pnpm version belongs in package.json only");
-  const installsPnpm = /^RUN .*npm install --global .*require\('[^']*package\.json'\)\.packageManager\b/;
+  const installsPnpm =
+    /^RUN .*npm install .*require\('[^']*package\.json'\)\.packageManager\b.*&& npm audit signatures\b/;
   let pnpmStages = 0;
   for (const stage of stages) {
     const firstUse = stage.findIndex((instruction) => /^RUN pnpm /.test(instruction));
@@ -52,6 +53,7 @@ test("pnpm is installed from the packageManager field in package.json", () => {
 
 test("runtime installs no package manager", () => {
   assert.deepEqual(inRuntime(/^RUN .*\b(npm|pnpm|corepack)\b/), []);
+  assert.deepEqual(inRuntime(/^COPY --from=\S+ \S*(\/root\/|\.npm|\.pnpm-store|\.cache|\/opt\/pnpm)/), []);
 });
 
 test("runtime listens on port 6239", () => {
