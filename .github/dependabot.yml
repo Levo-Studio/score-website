@@ -1,0 +1,52 @@
+# Weekly version updates. Minor and patch updates of an ecosystem arrive as one
+# grouped pull request, every major update as its own. Security updates are
+# controlled in the repository settings and are not limited by this file.
+version: 2
+
+updates:
+  # Actions pinned to a commit SHA stay pinned; Dependabot keeps the SHA and
+  # its "# vX.Y.Z" version comment in sync.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    groups:
+      actions-minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps
+
+  # pnpm projects use the npm ecosystem (package.json and pnpm-lock.yaml).
+  # Dependabot runs the pnpm version from "packageManager" but never bumps it.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      # Also used for devDependencies as long as no prefix-development is set.
+      prefix: deps
+
+  # Every file in the directory whose name contains "dockerfile" (any case) is
+  # picked up, so Dockerfile.dokploy needs no rename. A "tag@sha256:digest" pin
+  # keeps both parts, updated together.
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    groups:
+      docker-minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps

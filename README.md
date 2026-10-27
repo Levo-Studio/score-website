@@ -101,7 +101,7 @@ Punkten — nicht aus einer Formel.
 
 ## Lokal entwickeln
 
-Voraussetzungen: Node.js 22, [pnpm](https://pnpm.io).
+Voraussetzungen: Node.js 26, [pnpm](https://pnpm.io).
 
 ```bash
 pnpm install
@@ -111,9 +111,12 @@ pnpm dev
 Die Seite läuft danach unter `http://localhost:6239`.
 
 ```bash
-pnpm build   # Produktions-Build
-pnpm lint    # ESLint
-pnpm start   # Produktions-Build lokal starten
+pnpm build      # Produktions-Build
+pnpm lint       # ESLint
+pnpm typecheck  # TypeScript prüfen
+pnpm test       # Unit-Tests
+pnpm test:e2e   # End-to-End-Tests gegen den Produktions-Build (vorher pnpm build)
+pnpm start      # Produktions-Build lokal starten
 ```
 
 <br />
