@@ -16,10 +16,44 @@ const isFrom = (instruction: string) => /^FROM /i.test(instruction);
 const runtimeStage = instructions.slice(instructions.findLastIndex(isFrom));
 const inRuntime = (pattern: RegExp) => runtimeStage.filter((instruction) => pattern.test(instruction));
 
+// Instructions grouped by build stage, each group starting with its FROM.
+const stages = instructions.reduce<string[][]>((groups, instruction) => {
+  if (isFrom(instruction)) groups.push([]);
+  groups.at(-1)?.push(instruction);
+  return groups;
+}, []);
+
 test("all stages build on the same base image", () => {
   const images = instructions.filter(isFrom).map((instruction) => instruction.split(" ")[1]);
   assert.ok(images.length > 0, "no FROM instruction found");
   assert.deepEqual(new Set(images).size, 1, `different base images: ${images.join(", ")}`);
+});
+
+test("base image is pinned by Node version, Alpine version and digest", () => {
+  for (const instruction of instructions.filter(isFrom)) {
+    assert.match(instruction.split(" ")[1], /^node:\d+\.\d+\.\d+-alpine\d+\.\d+@sha256:[0-9a-f]{64}$/);
+  }
+});
+
+test("pnpm is installed from the packageManager field in package.json", () => {
+  assert.doesNotMatch(dockerfile, /corepack/i, "Node 26 images ship without corepack");
+  assert.doesNotMatch(dockerfile, /pnpm@\d/, "the pnpm version belongs in package.json only");
+  const installsPnpm =
+    /^RUN .*npm install .*require\('[^']*package\.json'\)\.packageManager\b.*&& npm audit signatures\b/;
+  let pnpmStages = 0;
+  for (const stage of stages) {
+    const firstUse = stage.findIndex((instruction) => /^RUN pnpm /.test(instruction));
+    if (firstUse === -1) continue;
+    pnpmStages += 1;
+    const install = stage.findIndex((instruction) => installsPnpm.test(instruction));
+    assert.ok(install !== -1 && install < firstUse, `${stage[0]}: pnpm is used before it is installed`);
+  }
+  assert.ok(pnpmStages > 0, "no stage runs pnpm");
+});
+
+test("runtime installs no package manager", () => {
+  assert.deepEqual(inRuntime(/^RUN .*\b(npm|pnpm|corepack)\b/), []);
+  assert.deepEqual(inRuntime(/^COPY --from=\S+ \S*(\/root\/|\.npm|\.pnpm-store|\.cache|\/opt\/pnpm)/), []);
 });
 
 test("runtime listens on port 6239", () => {

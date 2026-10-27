@@ -101,7 +101,7 @@ Punkten — nicht aus einer Formel.
 
 ## Lokal entwickeln
 
-Voraussetzungen: Node.js 22, [pnpm](https://pnpm.io).
+Voraussetzungen: Node.js 26, [pnpm](https://pnpm.io).
 
 ```bash
 pnpm install

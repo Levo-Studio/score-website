@@ -1,3 +1,12 @@
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
+
+# CI and the image install exactly the pnpm from packageManager. Without this,
+# pnpm 12 writes a second YAML document into pnpm-lock.yaml, which GitHub's
+# dependency graph cannot read.
+pmOnFail: ignore
+
+# Keeps the pnpm 10 behaviour: a fresh security release can be installed
+# right away instead of failing CI and the image build for a day.
+minimumReleaseAge: 0
